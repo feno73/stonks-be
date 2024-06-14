@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Usuario {
+  id             String     @id @default(uuid())
+  nombre         String
+  email          String     @unique
+  password       String
+  fecha_creacion DateTime   @default(now())
+  ultima_conexion DateTime?
+  tenencias      Tenencia[]
+}
+
+model Activo {
+  id             String     @id @default(uuid())
+  nombre         String
+  tipo           String
+  ticker         String?
+  fecha_creacion DateTime   @default(now())
+  precios        Precio[]
+  tenencias      Tenencia[]
+}
+
+model Tenencia {
+  id            String   @id @default(uuid())
+  usuario_id    String
+  activo_id     String
+  cantidad      Float
+  precio_compra Float
+  fecha_compra  DateTime
+  usuario       Usuario  @relation(fields: [usuario_id], references: [id])
+  activo        Activo   @relation(fields: [activo_id], references: [id])
+
+  @@index([usuario_id])
+  @@index([activo_id])
+}
+
+model Precio {
+  id         String   @id @default(uuid())
+  activo_id  String
+  precio_usd Float
+  precio_ars Float
+  fecha      DateTime
+  activo     Activo   @relation(fields: [activo_id], references: [id])
+
+  @@index([activo_id])
+}
+
+model TasaCambio {
+  id           String   @id @default(uuid())
+  tasa_usd_ars Float
+  fecha        DateTime
+}
