@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prima.service';
 import { CreatePrecioDto } from './dto/create-precio.dto';
 import { PrecioDto } from './dto/precio.dto';
-import { TenenciaService } from "../tenencia/tenecia.service";
+import { TenenciaService } from '../tenencia/tenecia.service';
 
 
 

@@ -7,5 +7,6 @@ import { PrismaModule } from '../prisma/prisma.module';
   imports: [PrismaModule],
   providers: [TenenciaService],
   controllers: [TenenciaController],
+  exports: [TenenciaService],
 })
 export class TenenciaModule {}

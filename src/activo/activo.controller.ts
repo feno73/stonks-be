@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Param, Body } from '@nestjs/common';
+import {Controller, Get, Post, Put, Param, Body, Delete} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
 import { ActivoService } from './activo.service';
-import { ActivoDto } from "./dto/activo.dto";
-import { CreateActivoDto } from "./dto/create-activo.dto";
+import { ActivoDto } from './dto/activo.dto';
+import { CreateActivoDto } from './dto/create-activo.dto';
+import { UpdateActivoDto } from './dto/update-activo.dto';
 
 @Controller('activos')
 @ApiTags('activos')
@@ -25,13 +26,22 @@ export class ActivoController {
     return this.activoService.findAll();
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Obtener un activo específico por ID' })
+  @Put(':id')
+  @ApiOperation({ summary: 'Actualizar un activo específico por ID' })
   @ApiParam({ name: 'id', required: true, description: 'ID del activo' })
-  @ApiResponse({ status: 200, description: 'Detalles del activo.', type: ActivoDto })
+  @ApiBody({ type: UpdateActivoDto })
+  @ApiResponse({ status: 200, description: 'El activo ha sido actualizado con éxito.', type: ActivoDto })
   @ApiResponse({ status: 404, description: 'Activo no encontrado.' })
-  findOne(@Param('id') id: string): Promise<ActivoDto | null> {
-    return this.activoService.findOne(id);
+  update(@Param('id') id: string, @Body() updateActivoDto: UpdateActivoDto): Promise<ActivoDto> {
+    return this.activoService.update(id, updateActivoDto);
   }
 
+  @Delete(':id')
+  @ApiOperation({ summary: 'Eliminar un activo específico por ID' })
+  @ApiParam({ name: 'id', required: true, description: 'ID del activo' })
+  @ApiResponse({ status: 200, description: 'El activo ha sido eliminado con éxito.', type: ActivoDto })
+  @ApiResponse({ status: 404, description: 'Activo no encontrado.' })
+  delete(@Param('id') id: string): Promise<ActivoDto> {
+    return this.activoService.delete(id);
+  }
 }
