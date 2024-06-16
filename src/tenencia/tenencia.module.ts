@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { TenenciaService } from './tenencia.service';
+import { TenenciaService } from './tenecia.service';
 import { TenenciaController } from './tenencia.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 

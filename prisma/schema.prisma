@@ -14,13 +14,13 @@ generator client {
 }
 
 model Usuario {
-  id             String     @id @default(uuid())
-  nombre         String
-  email          String     @unique
-  password       String
-  fecha_creacion DateTime   @default(now())
+  id              String     @id @default(uuid())
+  nombre          String
+  email           String     @unique
+  password        String
+  fecha_creacion  DateTime   @default(now())
   ultima_conexion DateTime?
-  tenencias      Tenencia[]
+  tenencias       Tenencia[]
 }
 
 model Activo {
@@ -60,6 +60,7 @@ model Precio {
 
 model TasaCambio {
   id           String   @id @default(uuid())
+  tipo         String
   tasa_usd_ars Float
   fecha        DateTime
 }
