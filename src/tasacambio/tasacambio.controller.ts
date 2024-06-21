@@ -1,5 +1,5 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { TasaCambioService } from './tasacambio.service';
 import { TasaCambioDto } from './dto/tasacambio.dto';
 import { CreateTasaCambioDto } from './dto/create-tasacambio.dto';
@@ -25,5 +25,13 @@ export class TasaCambioController {
         return this.tasaCambioService.findAll();
     }
 
-    // Añade más endpoints según necesites
+    @Get('por-fecha')
+    @ApiOperation({ summary: 'Obtener la tasa de cambio por fecha' })
+    @ApiQuery({ name: 'fecha', required: true, type: String, description: 'Fecha de la tasa de cambio.' })
+    @ApiResponse({ status: 200, description: 'La tasa de cambio ha sido obtenida con éxito.', type: TasaCambioDto })
+    @ApiResponse({ status: 400, description: 'Parámetros inválidos.' })
+    findByDate(@Query('fecha') fecha: string): Promise<TasaCambioDto | null> {
+        const date = new Date(fecha);
+        return this.tasaCambioService.findByDate(date);
+    }
 }

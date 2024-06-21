@@ -7,5 +7,6 @@ import { PrismaModule } from '../prisma/prisma.module';
     imports: [PrismaModule],
     providers: [TasaCambioService],
     controllers: [TasaCambioController],
+    exports: [TasaCambioService],
 })
 export class TasaCambioModule {}
