@@ -30,49 +30,98 @@ export class TenenciaService {
     });
   }
 
-  async findByUsuarioId(usuarioId: string): Promise<TenenciaUsuarioDto[]> {
+  async findByUsuarioId(usuarioId: string): Promise<{
+    items: TenenciaUsuarioDto[],
+    totals: {}
+  }> {
     const tenencias = await this.prisma.tenencia.findMany({
       where: { usuario_id: usuarioId },
       include: { activo: true },
     });
     if (tenencias.length === 0) {
-      return [];
+      return { items: [], totals: {}};
     }
 
     const tasaCambioActual = await this.tasaCambioService.findCurrentRate();
     console.log(tasaCambioActual)
-    const results = [];
+
+    const items = [];
+
+    let total_ganancia = 0;
+    let total_ganancia_usd = 0;
+    let total_precio_compra = 0;
+    let total_precio_compra_usd = 0;
+    let total_precio_venta = 0;
+    let total_precio_venta_usd = 0;
 
     for (const tenencia of tenencias) {
       const { activo, cantidad, fecha_compra, precio_compra } = tenencia;
 
-      const precioActual = await this.iolService.getPrecioActual(activo.ticker);
-      const precioActualUSD = precioActual / tasaCambioActual.tasa_usd_ars;
-      const tasaCambioCompra = await this.tasaCambioService.findByDate(new Date(fecha_compra));
-      const precioCompraUSD = precio_compra / tasaCambioCompra.tasa_usd_ars
-      const ganancia = precioActual * cantidad
-      const gananciaUSD = ganancia / tasaCambioActual.tasa_usd_ars;
+      const tasa_cambio_compra = await this.tasaCambioService.findByDate(new Date(fecha_compra));
 
-      const gananciaPorcenaje = ((precioActual - precio_compra) / precio_compra) * 100;
-      const gananciaPorcenajeUSD = ((precioActualUSD - precioCompraUSD) / precioCompraUSD) * 100;
+      const activo_precio_actual = await this.iolService.getPrecioActual(activo.ticker);
+      const activo_precio_actual_usd = activo_precio_actual / tasaCambioActual.tasa_usd_ars;
+      const activo_precio_compra_usd = precio_compra / tasa_cambio_compra.tasa_usd_ars;
+
+      const tenencia_precio_compra = precio_compra * cantidad;
+      const tenencia_precio_compra_usd = activo_precio_compra_usd * cantidad;
+      const tenencia_precio_venta = activo_precio_actual * cantidad;
+      const tenencia_precio_venta_usd = activo_precio_actual_usd * cantidad;
+
+      const ganancia = tenencia_precio_venta - tenencia_precio_compra;
+      const ganancia_usd = tenencia_precio_venta_usd - tenencia_precio_compra_usd;
+
+      const ganancia_porcentaje = (ganancia * 100) / (precio_compra * cantidad)
+      const ganancia_porcentaje_usd = (ganancia_usd * 100) / (activo_precio_compra_usd * cantidad)
 
 
-      results.push({
+      total_ganancia += ganancia;
+      total_ganancia_usd += ganancia_usd;
+      total_precio_compra += tenencia_precio_compra;
+      total_precio_compra_usd += tenencia_precio_compra_usd;
+      total_precio_venta += tenencia_precio_venta;
+      total_precio_venta_usd += tenencia_precio_venta_usd;
+
+      console.log('Total ganancia: ', total_ganancia)
+      console.log('Total ganancia_usd: ', total_ganancia_usd)
+      console.log('Total precio_compra: ', total_precio_compra)
+      console.log('Total precio_compra_usd: ', total_precio_compra_usd)
+      console.log('Total precio_venta: ', total_precio_venta)
+      console.log('Total precio_venta_usd: ', total_precio_venta_usd)
+
+
+      items.push({
         nombre: activo.nombre,
         ticker: activo.ticker,
         cantidad,
         fecha_compra,
         precio_compra,
-        precio_actual: precioActual,
-        precio_actual_usd: precioActualUSD,
+        precio_compra_usd: activo_precio_compra_usd,
+        precio_actual: activo_precio_actual,
+        precio_actual_usd: activo_precio_actual_usd,
+        precio_venta: tenencia_precio_venta,
+        precio_venta_usd: tenencia_precio_venta_usd,
         ganancia,
-        ganancia_usd: gananciaUSD,
-        ganancia_porcentaje: gananciaPorcenaje,
-        ganancia_porcentaje_usd: gananciaPorcenajeUSD,
+        ganancia_usd: ganancia_usd,
+        ganancia_porcentaje: ganancia_porcentaje,
+        ganancia_porcentaje_usd: ganancia_porcentaje_usd,
       });
+      console.log(items)
     }
 
-    return results;
+    return {
+      items,
+      totals: {
+        total_ganancia,
+        total_ganancia_usd,
+        total_precio_compra,
+        total_precio_compra_usd,
+        total_precio_venta,
+        total_precio_venta_usd,
+        total_ganancia_porcentaje: (total_ganancia * 100) / total_precio_compra,
+        total_ganancia_porcentaje_usd: (total_ganancia_usd * 100) / total_precio_compra_usd,
+      },
+    };
   }
 
 

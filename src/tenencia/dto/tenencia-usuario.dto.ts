@@ -20,10 +20,19 @@ export class TenenciaUsuarioDto {
     precio_compra: number;
 
     @ApiProperty()
+    precio_compra_usd: number;
+
+    @ApiProperty()
     precio_actual: number;
 
     @ApiProperty()
     precio_actual_usd: number;
+
+    @ApiProperty()
+    precio_venta:number
+
+    @ApiProperty()
+    precio_venta_usd:number
 
     @ApiProperty()
     ganancia: number;

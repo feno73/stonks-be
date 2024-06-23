@@ -21,8 +21,18 @@ export class TasaCambioController {
     @Get()
     @ApiOperation({ summary: 'Obtener todas las tasas de cambio' })
     @ApiResponse({ status: 200, description: 'Lista de tasas de cambio.', type: [TasaCambioDto] })
-    findAll(): Promise<TasaCambioDto[]> {
-        return this.tasaCambioService.findAll();
+    findAll(
+        @Query('page') page: string = '1',
+        @Query('limit') limit: string = '10',
+    ): Promise<{
+        items: TasaCambioDto[],
+        totalItems: number,
+        totalPages: number,
+        currentPage: number
+    }> {
+        const pageNumber = parseInt(page, 10)
+        const limitNumber = parseInt(limit, 10)
+        return this.tasaCambioService.findAll({ page: pageNumber, limit: limitNumber });
     }
 
     @Get('por-fecha')

@@ -40,7 +40,10 @@ export class TenenciaController {
   @ApiParam({ name: 'usuarioId', required: true, description: 'ID del usuario' })
   @ApiResponse({ status: 200, description: 'Lista de tenencias del usuario.', type: TenenciaUsuarioDto, isArray: true })
   @ApiResponse({ status: 404, description: 'Tenencias no encontradas para el usuario.' })
-  findByUsuarioId(@Param('usuarioId') usuarioId: string): Promise<TenenciaUsuarioDto[]> {
+  findByUsuarioId(@Param('usuarioId') usuarioId: string): Promise<{
+    items: TenenciaUsuarioDto[],
+    totals: {}
+  }> {
     return this.tenenciaService.findByUsuarioId(usuarioId);
   }
 

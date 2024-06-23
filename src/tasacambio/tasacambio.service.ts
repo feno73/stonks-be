@@ -13,16 +13,45 @@ export class TasaCambioService {
         });
     }
 
-    async findAll(): Promise<TasaCambioDto[]> {
-        return this.prisma.tasaCambio.findMany();
+    async findAll(paginationQuery: { page: number, limit: number }): Promise<{
+        items: TasaCambioDto[],
+        totalItems: number,
+        totalPages: number,
+        currentPage: number
+    }> {
+        const { page, limit } = paginationQuery;
+        console.log('Log del limit', typeof(limit), limit);
+        const skip = (page - 1) * limit;
+        const take = limit;
+
+        const [items, totalItems] = await this.prisma.$transaction([
+            this.prisma.tasaCambio.findMany({
+                skip,
+                take,
+                orderBy: {
+                    fecha: 'desc',
+                }
+            }),
+            this.prisma.tasaCambio.count()
+        ]);
+
+        const totalPages = Math.ceil(totalItems / limit);
+
+        return {
+            items,
+            totalItems,
+            totalPages,
+            currentPage: page,
+        }
     }
 
     async findByDate(fecha: Date): Promise<TasaCambioDto | null> {
-        const startOfDay = new Date(fecha);
-        startOfDay.setHours(0, 0, 0, 0);
+        const year = fecha.getUTCFullYear();
+        const month = fecha.getUTCMonth();
+        const day = fecha.getUTCDate();
 
-        const endOfDay = new Date(fecha);
-        endOfDay.setHours(23, 59, 59, 999);
+        const startOfDay = new Date(Date.UTC(year, month, day, 0, 0, 0, 0));
+        const endOfDay = new Date(Date.UTC(year, month, day, 23, 59, 59, 999));
 
         return this.prisma.tasaCambio.findFirst({
             where: {
