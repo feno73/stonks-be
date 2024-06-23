@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/s
 import { TenenciaService } from './tenecia.service';
 import { TenenciaDto } from './dto/tenencia.dto';
 import { CreateTenenciaDto } from './dto/create-tenencia.dto';
+import {TenenciaUsuarioDto} from "./dto/tenencia-usuario.dto";
 
 @Controller('tenencias')
 @ApiTags('tenencias')
@@ -37,9 +38,9 @@ export class TenenciaController {
   @Get('usuario/:usuarioId')
   @ApiOperation({ summary: 'Obtener todas las tenencias de un usuario específico' })
   @ApiParam({ name: 'usuarioId', required: true, description: 'ID del usuario' })
-  @ApiResponse({ status: 200, description: 'Lista de tenencias del usuario.', type: [TenenciaDto] })
+  @ApiResponse({ status: 200, description: 'Lista de tenencias del usuario.', type: [TenenciaUsuarioDto], isArray: true })
   @ApiResponse({ status: 404, description: 'Tenencias no encontradas para el usuario.' })
-  findByUsuarioId(@Param('usuarioId') usuarioId: string): Promise<any[]> {
+  findByUsuarioId(@Param('usuarioId') usuarioId: string): Promise<TenenciaUsuarioDto[]> {
     return this.tenenciaService.findByUsuarioId(usuarioId);
   }
 

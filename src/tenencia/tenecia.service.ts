@@ -4,6 +4,7 @@ import { TenenciaDto } from "./dto/tenencia.dto";
 import { CreateTenenciaDto } from "./dto/create-tenencia.dto";
 import { TasaCambioService } from "../tasacambio/tasacambio.service";
 import { IOLService } from "../iol/iol.service";
+import {TenenciaUsuarioDto} from "./dto/tenencia-usuario.dto";
 
 @Injectable()
 export class TenenciaService {
@@ -29,7 +30,7 @@ export class TenenciaService {
     });
   }
 
-  async findByUsuarioId(usuarioId: string): Promise<TenenciaDto[]> {
+  async findByUsuarioId(usuarioId: string): Promise<TenenciaUsuarioDto[]> {
     const tenencias = await this.prisma.tenencia.findMany({
       where: { usuario_id: usuarioId },
       include: { activo: true },
