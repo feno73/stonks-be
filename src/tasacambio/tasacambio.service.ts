@@ -36,14 +36,17 @@ export class TasaCambioService {
 
     async findCurrentRate(): Promise<TasaCambioDto | null> {
         const today = new Date();
-        let rate = this.findByDate(today);
+        console.log('Log del hoy',today);
+        let rate = await this.findByDate(today);
+        console.log('Rate de hoy',rate);
         if(!rate) {
-            rate = this.prisma.tasaCambio.findFirst({
+            rate = await this.prisma.tasaCambio.findFirst({
                 orderBy: {
                     fecha: 'desc',
                 }
             })
         }
+        console.log('Rate final',rate);
         return rate;
     }
 }

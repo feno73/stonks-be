@@ -4,7 +4,7 @@ import { TenenciaDto } from "./dto/tenencia.dto";
 import { CreateTenenciaDto } from "./dto/create-tenencia.dto";
 import { TasaCambioService } from "../tasacambio/tasacambio.service";
 import { IOLService } from "../iol/iol.service";
-import {TenenciaUsuarioDto} from "./dto/tenencia-usuario.dto";
+import { TenenciaUsuarioDto } from "./dto/tenencia-usuario.dto";
 
 @Injectable()
 export class TenenciaService {
