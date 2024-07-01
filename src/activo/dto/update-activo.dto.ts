@@ -10,4 +10,7 @@ export class UpdateActivoDto extends PartialType(CreateActivoDto) {
 
     @ApiProperty()
     ticker?: string;
+
+    @ApiProperty()
+    imagen?: string;
 }

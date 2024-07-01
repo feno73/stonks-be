@@ -14,5 +14,8 @@ export class ActivoDto {
     ticker?: string;
 
     @ApiProperty()
+    imagen?: string;
+
+    @ApiProperty()
     fecha_creacion: Date;
 }

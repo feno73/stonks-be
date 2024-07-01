@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { PrismaService } from '../prisma/prima.service';
 import { TenenciaDto } from "./dto/tenencia.dto";
 import { CreateTenenciaDto } from "./dto/create-tenencia.dto";
 import { TasaCambioService } from "../tasacambio/tasacambio.service";
 import { IOLService } from "../iol/iol.service";
 import { TenenciaUsuarioDto } from "./dto/tenencia-usuario.dto";
+import { Redis } from 'ioredis';
+
 
 @Injectable()
 export class TenenciaService {
@@ -12,6 +14,7 @@ export class TenenciaService {
       private prisma: PrismaService,
       private tasaCambioService: TasaCambioService,
       private iolService: IOLService,
+      @Inject('REDIS_CLIENT') private readonly redisClient: Redis,
   ) {}
 
   async create(data: CreateTenenciaDto): Promise<TenenciaDto> {
@@ -43,7 +46,6 @@ export class TenenciaService {
     }
 
     const tasaCambioActual = await this.tasaCambioService.findCurrentRate();
-    console.log(tasaCambioActual)
 
     const items = [];
 
@@ -55,11 +57,11 @@ export class TenenciaService {
     let total_precio_venta_usd = 0;
 
     for (const tenencia of tenencias) {
-      const { activo, cantidad, fecha_compra, precio_compra } = tenencia;
+      const { id, activo, cantidad, fecha_compra, precio_compra } = tenencia;
 
       const tasa_cambio_compra = await this.tasaCambioService.findByDate(new Date(fecha_compra));
 
-      const activo_precio_actual = await this.iolService.getPrecioActual(activo.ticker);
+      const activo_precio_actual = await this.getPrecioActivoCache(activo.ticker);
       const activo_precio_actual_usd = activo_precio_actual / tasaCambioActual.tasa_usd_ars;
       const activo_precio_compra_usd = precio_compra / tasa_cambio_compra.tasa_usd_ars;
 
@@ -89,10 +91,11 @@ export class TenenciaService {
       console.log('Total precio_venta: ', total_precio_venta)
       console.log('Total precio_venta_usd: ', total_precio_venta_usd)
 
-
       items.push({
+        id,
         nombre: activo.nombre,
         ticker: activo.ticker,
+        imagen: activo.imagen,
         cantidad,
         fecha_compra,
         precio_compra,
@@ -124,8 +127,6 @@ export class TenenciaService {
     };
   }
 
-
-
   async findByActivoId(activoId: string): Promise<TenenciaDto[]> {
     return this.prisma.tenencia.findMany({
       where: { activo_id: activoId },
@@ -145,5 +146,26 @@ export class TenenciaService {
     const totalCost = tenencias.reduce((sum, tenencia) => sum + (tenencia.cantidad * tenencia.precio_compra), 0);
 
     return totalCost / totalAmount;
+  }
+
+  private async getPrecioActivoCache(ticker: string): Promise<number> {
+    const hoy = new Date().toISOString().split('T')[0];
+    const cache_key = `precio_activo_${ticker}_${hoy}`;
+
+    let precio_activo = await this.redisClient.get(cache_key);
+
+
+
+    if (precio_activo) {
+      console.log('Precio activo cache hit')
+      return parseFloat(precio_activo);
+    }
+
+    console.log('Precio activo cache miss')
+    const nuevo_precio = await this.iolService.getPrecioActual(ticker);
+
+    await this.redisClient.set(cache_key, nuevo_precio, 'EX', 86400);
+
+    return nuevo_precio;
   }
 }

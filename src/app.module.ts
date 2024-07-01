@@ -5,9 +5,10 @@ import { ActivoModule } from './activo/activo.module';
 import { TenenciaModule } from './tenencia/tenencia.module';
 import { PrecioModule } from './precio/precio.module';
 import { TasaCambioModule } from './tasacambio/tasacambio.module';
-import { HttpModule } from "@nestjs/axios";
-import { ConfigModule } from "@nestjs/config";
-import { IOLModule } from "./iol/iol.module";
+import { HttpModule } from '@nestjs/axios';
+import { ConfigModule } from '@nestjs/config';
+import { IOLModule } from './iol/iol.module';
+import { UploaderModule } from './uploader/uploader.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { IOLModule } from "./iol/iol.module";
       isGlobal: true,
     }),
     IOLModule,
+    UploaderModule,
   ],
 })
 export class AppModule {}

@@ -29,6 +29,7 @@ model Activo {
   tipo           String
   ticker         String?
   fecha_creacion DateTime   @default(now())
+  imagen         String?
   precios        Precio[]
   tenencias      Tenencia[]
 }
@@ -55,6 +56,7 @@ model Precio {
   fecha      DateTime
   activo     Activo   @relation(fields: [activo_id], references: [id])
 
+  @@unique([activo_id, fecha])
   @@index([activo_id])
 }
 

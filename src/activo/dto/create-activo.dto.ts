@@ -9,4 +9,7 @@ export class CreateActivoDto {
 
     @ApiProperty()
     ticker?: string;
+
+    @ApiProperty()
+    imagen?: string;
 }
